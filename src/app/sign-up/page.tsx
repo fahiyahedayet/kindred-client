@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { HeartHandshake, Mail, Lock, User, Camera } from "lucide-react";
+import { HeartHandshake, Mail, Lock, User, Camera, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -14,6 +14,9 @@ export default function SignUpPage() {
         password: "",
         confirmPassword: "",
     });
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -178,27 +181,59 @@ export default function SignUpPage() {
                                 <label className="mb-2 block text-sm font-semibold">
                                     Password
                                 </label>
+
                                 <div className="relative">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
+
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
                                         placeholder="Create a password"
-                                        className="w-full rounded-xl border border-border bg-surface py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-primary"
+                                        className="w-full rounded-xl border border-border bg-surface py-3.5 pl-11 pr-12 text-sm outline-none transition focus:border-primary"
                                     />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted"
+                                        aria-label="Toggle password visibility"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
                                 </div>
+
+                                <p className="mt-2 text-xs text-muted">
+                                    At least 6 characters, including uppercase and lowercase letters.
+                                </p>
                             </div>
 
                             <div>
                                 <label className="mb-2 block text-sm font-semibold">
                                     Confirm Password
                                 </label>
+
                                 <div className="relative">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
+
                                     <input
-                                        type="password"
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        name="confirmPassword"
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
                                         placeholder="Confirm your password"
-                                        className="w-full rounded-xl border border-border bg-surface py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-primary"
+                                        className="w-full rounded-xl border border-border bg-surface py-3.5 pl-11 pr-12 text-sm outline-none transition focus:border-primary"
                                     />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted"
+                                        aria-label="Toggle confirm password visibility"
+                                    >
+                                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
                                 </div>
                             </div>
 
