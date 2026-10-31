@@ -19,6 +19,11 @@ import {
   Users,
   HandHeart,
   Clock,
+  Sparkles,
+  Compass,
+  Trophy,
+  CheckCircle2,
+  Target,
 } from "lucide-react";
 
 const user = {
@@ -89,57 +94,70 @@ export default function ProfilePage() {
       <main className="min-h-screen bg-background">
         <section className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
           {/* Page Heading */}
-          <div className="mb-10">
-            <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary-dark">
-              Your Space
-            </p>
-            <h1 className="text-3xl font-bold md:text-4xl">
-              My Profile
-            </h1>
-            <p className="mt-2 text-muted">
-              Manage your information and keep track of your community journey.
-            </p>
+          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary-dark">
+                Your Space
+              </p>
+              <h1 className="text-3xl font-bold md:text-4xl">
+                My Profile
+              </h1>
+              <p className="mt-2 text-sm text-muted md:text-base">
+                Manage your information and celebrate your community journey.
+              </p>
+            </div>
+
+            <Link
+              href="/profile/update"
+              className="inline-flex items-center justify-center gap-2 self-start rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark sm:self-auto"
+            >
+              <Pencil size={16} />
+              Edit Profile
+            </Link>
           </div>
 
           {/* Profile Card */}
-          <div className="overflow-hidden rounded-3xl border border-border bg-surface">
-            <div className="h-36 bg-gradient-to-r from-primary/30 via-secondary to-peach" />
+          <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+            <div className="relative h-36 overflow-hidden bg-gradient-to-r from-primary/30 via-secondary to-peach md:h-44">
+              <div className="absolute -right-8 -top-16 h-48 w-48 rounded-full border-[25px] border-white/20" />
+              <div className="absolute -bottom-20 left-1/3 h-44 w-44 rounded-full bg-white/10 blur-2xl" />
+              <Sparkles className="absolute right-10 top-10 text-foreground/40" size={26} />
+            </div>
 
             <div className="px-6 pb-8 md:px-10">
               <div className="-mt-14 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
                   <img
                     src={user.image}
-                    alt={user.name}
-                    className="h-28 w-28 rounded-2xl border-4 border-surface object-cover shadow-md"
+                    alt={`${user.name}'s profile`}
+                    className="h-28 w-28 rounded-2xl border-4 border-surface object-cover shadow-md md:h-32 md:w-32"
                   />
 
                   <div className="pb-1">
-                    <h2 className="text-2xl font-bold">{user.name}</h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-2xl font-bold md:text-3xl">
+                        {user.name}
+                      </h2>
+                      <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold">
+                        Member
+                      </span>
+                    </div>
                     <p className="mt-1 text-sm text-muted">
-                      Kindred Community Member
+                      Making a difference, one act at a time.
                     </p>
                   </div>
                 </div>
-
-                <Link
-                  href="/profile/update"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark"
-                >
-                  <Pencil size={16} />
-                  Edit Profile
-                </Link>
               </div>
 
               {/* User Information */}
-              <div className="mt-8 grid gap-5 border-t border-border pt-7 sm:grid-cols-2">
+              <div className="mt-8 grid gap-5 border-t border-border pt-7 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="flex items-center gap-3">
                   <div className="rounded-xl bg-surface-soft p-3">
                     <Mail size={19} className="text-primary-dark" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs text-muted">Email Address</p>
-                    <p className="text-sm font-medium">{user.email}</p>
+                    <p className="truncate text-sm font-medium">{user.email}</p>
                   </div>
                 </div>
 
@@ -147,9 +165,9 @@ export default function ProfilePage() {
                   <div className="rounded-xl bg-surface-soft p-3">
                     <MapPin size={19} className="text-primary-dark" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs text-muted">Location</p>
-                    <p className="text-sm font-medium">{user.location}</p>
+                    <p className="truncate text-sm font-medium">{user.location}</p>
                   </div>
                 </div>
 
@@ -184,20 +202,57 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Activity Statistics */}
-          <div className="mt-8">
-            <h2 className="mb-5 text-xl font-bold">Your Impact</h2>
+          {/* Profile Completion */}
+          <div className="mt-8 rounded-2xl border border-border bg-surface p-6 md:p-7">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={20} className="text-primary-dark" />
+                  <h2 className="font-bold">Your Profile is Looking Good!</h2>
+                </div>
+                <p className="mt-2 text-sm text-muted">
+                  Keep your information updated so your community can know you better.
+                </p>
+              </div>
 
-            <div className="grid gap-5 sm:grid-cols-3">
+              <span className="text-2xl font-bold text-primary-dark">
+                80%
+              </span>
+            </div>
+
+            <div className="mt-5 h-2 overflow-hidden rounded-full bg-surface-soft">
+              <div className="h-full w-4/5 rounded-full bg-primary transition-all" />
+            </div>
+
+            <Link
+              href="/profile/update"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary-dark hover:gap-3"
+            >
+              Complete your profile <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          {/* Activity Statistics */}
+          <div className="mt-10">
+            <div className="mb-5">
+              <p className="text-sm font-semibold uppercase tracking-widest text-primary-dark">
+                Your Contribution
+              </p>
+              <h2 className="mt-1 text-xl font-bold md:text-2xl">
+                Your Impact
+              </h2>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               <button
                 onClick={() => setActiveFilter("Joined")}
-                className={`rounded-2xl border bg-surface p-6 text-left transition hover:-translate-y-1 hover:shadow-md ${
+                className={`group rounded-2xl border bg-surface p-6 text-left transition duration-300 hover:-translate-y-1 hover:shadow-md ${
                   activeFilter === "Joined"
                     ? "border-primary ring-2 ring-primary/20"
-                    : "border-border"
+                    : "border-border hover:border-primary/50"
                 }`}
               >
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-secondary transition group-hover:scale-110">
                   <CalendarCheck size={21} />
                 </div>
                 <p className="text-3xl font-bold">08</p>
@@ -209,13 +264,13 @@ export default function ProfilePage() {
 
               <button
                 onClick={() => setActiveFilter("Completed")}
-                className={`rounded-2xl border bg-surface p-6 text-left transition hover:-translate-y-1 hover:shadow-md ${
+                className={`group rounded-2xl border bg-surface p-6 text-left transition duration-300 hover:-translate-y-1 hover:shadow-md ${
                   activeFilter === "Completed"
                     ? "border-primary ring-2 ring-primary/20"
-                    : "border-border"
+                    : "border-border hover:border-primary/50"
                 }`}
               >
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-peach">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-peach transition group-hover:scale-110">
                   <Heart size={21} />
                 </div>
                 <p className="text-3xl font-bold">12</p>
@@ -232,17 +287,22 @@ export default function ProfilePage() {
                 <p className="text-3xl font-bold">Active</p>
                 <p className="mt-1 text-sm text-muted">Account Status</p>
                 <p className="mt-3 text-xs text-muted">
-                  Your account is in good standing
+                  Your account is in good standing.
                 </p>
               </div>
             </div>
           </div>
 
           {/* Recent Activity */}
-          <div className="mt-10 rounded-2xl border border-border bg-surface p-6 md:p-8">
+          <div className="mt-10 rounded-2xl border border-border bg-surface p-6 shadow-sm md:p-8">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <div>
-                <h2 className="text-xl font-bold">Recent Activity</h2>
+                <p className="text-sm font-semibold uppercase tracking-widest text-primary-dark">
+                  Your Journey
+                </p>
+                <h2 className="mt-1 text-xl font-bold md:text-2xl">
+                  Recent Activity
+                </h2>
                 <p className="mt-1 text-sm text-muted">
                   Follow your journey and community contributions.
                 </p>
@@ -256,15 +316,16 @@ export default function ProfilePage() {
               </Link>
             </div>
 
-            {/* Activity Filters */}
+            {/* Filters */}
             <div className="mt-6 flex flex-wrap gap-2">
               {filters.map((filter) => (
                 <button
                   key={filter}
                   onClick={() => setActiveFilter(filter)}
+                  aria-pressed={activeFilter === filter}
                   className={`rounded-full px-5 py-2 text-sm font-medium transition ${
                     activeFilter === filter
-                      ? "bg-primary text-white"
+                      ? "bg-primary text-white shadow-sm"
                       : "bg-surface-soft text-muted hover:bg-primary/15"
                   }`}
                 >
@@ -283,7 +344,7 @@ export default function ProfilePage() {
                     <Link
                       key={activity.id}
                       href={`/events/${activity.id}`}
-                      className="flex flex-col gap-4 rounded-xl border border-border p-4 transition hover:border-primary/50 hover:bg-surface-soft/50 sm:flex-row sm:items-center sm:justify-between"
+                      className="group flex flex-col gap-4 rounded-xl border border-border p-4 transition duration-300 hover:border-primary/50 hover:bg-surface-soft/50 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="flex items-center gap-4">
                         <div
@@ -293,7 +354,7 @@ export default function ProfilePage() {
                         </div>
 
                         <div>
-                          <h3 className="font-semibold">
+                          <h3 className="font-semibold transition group-hover:text-primary-dark">
                             {activity.title}
                           </h3>
                           <p className="mt-1 text-xs text-muted">
@@ -315,7 +376,7 @@ export default function ProfilePage() {
 
                         <ArrowRight
                           size={18}
-                          className="text-muted"
+                          className="text-muted transition group-hover:translate-x-1 group-hover:text-primary-dark"
                         />
                       </div>
                     </Link>
@@ -336,38 +397,74 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {/* Community CTA */}
+          <div className="relative mt-10 overflow-hidden rounded-3xl bg-gradient-to-r from-secondary via-surface-soft to-peach p-7 md:p-10">
+            <div className="relative z-10 max-w-2xl">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface/70">
+                <Compass size={24} />
+              </div>
+
+              <h2 className="text-2xl font-bold md:text-3xl">
+                There&apos;s More Good to Do.
+              </h2>
+
+              <p className="mt-3 text-sm leading-7 text-muted md:text-base">
+                Discover meaningful events, meet people who care, and turn
+                small acts into greater change.
+              </p>
+
+              <Link
+                href="/events"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark"
+              >
+                Explore Events <ArrowRight size={17} />
+              </Link>
+            </div>
+
+            <Trophy
+              size={150}
+              className="absolute -bottom-8 -right-5 hidden rotate-12 text-foreground/5 md:block"
+            />
+          </div>
+
           {/* Quick Links */}
-          <div className="mt-8 rounded-2xl border border-border bg-surface p-6 md:p-8">
-            <h3 className="text-lg font-bold">Your Activities</h3>
+          <div className="mt-10">
+            <h2 className="text-xl font-bold">Your Activities</h2>
             <p className="mt-1 text-sm text-muted">
-              Continue making a difference in your community.
+              Manage your events and community participation.
             </p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <Link
                 href="/joined-events"
-                className="flex items-center justify-between rounded-xl bg-surface-soft p-5 transition hover:bg-primary/15"
+                className="group flex items-center justify-between rounded-2xl border border-border bg-surface p-5 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
               >
                 <div>
                   <p className="font-semibold">Joined Events</p>
                   <p className="mt-1 text-xs text-muted">
-                    View events you have joined
+                    View events you have joined.
                   </p>
                 </div>
-                <ArrowRight size={19} />
+                <ArrowRight
+                  size={19}
+                  className="text-muted transition group-hover:translate-x-1 group-hover:text-primary-dark"
+                />
               </Link>
 
               <Link
                 href="/manage-events"
-                className="flex items-center justify-between rounded-xl bg-surface-soft p-5 transition hover:bg-primary/15"
+                className="group flex items-center justify-between rounded-2xl border border-border bg-surface p-5 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-md"
               >
                 <div>
                   <p className="font-semibold">Manage Events</p>
                   <p className="mt-1 text-xs text-muted">
-                    Manage events you have created
+                    Manage events you have created.
                   </p>
                 </div>
-                <ArrowRight size={19} />
+                <ArrowRight
+                  size={19}
+                  className="text-muted transition group-hover:translate-x-1 group-hover:text-primary-dark"
+                />
               </Link>
             </div>
           </div>
