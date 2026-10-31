@@ -2,13 +2,14 @@
 "use client";
 
 import Link from "next/link";
-import { HeartHandshake, Mail, Lock, Heart, ArrowRight } from "lucide-react";
+import { HeartHandshake, Mail, Lock, Heart, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function SignInPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -108,21 +109,35 @@ export default function SignInPage() {
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
-                                    <input
-                                        type="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Enter your password"
-                                        className="w-full rounded-xl border border-border bg-surface py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-primary"
-                                    />
-                                </div>
-                            </div>
+                           <div>
+  <label className="mb-2 block text-sm font-semibold">
+    Password
+  </label>
+
+  <div className="relative">
+    <Lock
+      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
+      size={18}
+    />
+
+    <input
+      type={showPassword ? "text" : "password"}
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      placeholder="Enter your password"
+      className="w-full rounded-xl border border-border bg-surface py-3.5 pl-11 pr-12 text-sm outline-none transition focus:border-primary"
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      aria-label="Toggle password visibility"
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted"
+    >
+      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
+</div>
 
                             <button
                                 type="submit"
