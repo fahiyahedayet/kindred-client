@@ -3,19 +3,22 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import toast from "react-hot-toast";
 import {
   CalendarDays,
-  TicketCheck,
-  CheckCircle2,
+  MapPin,
+  Clock,
+  Users,
+  Search,
   Heart,
   ArrowUpRight,
-  Search,
-  Clock,
-  MapPin,
-  Users,
+  TicketCheck,
+  CheckCircle2,
+  X,
+  Sparkles,
 } from "lucide-react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 type JoinedEvent = {
   id: string;
@@ -82,11 +85,13 @@ const initialEvents: JoinedEvent[] = [
 ];
 
 export default function JoinedEventsPage() {
+  const [events, setEvents] = useState(initialEvents);
   const [activeTab, setActiveTab] = useState("All");
   const [search, setSearch] = useState("");
+  const [leaveId, setLeaveId] = useState<string | null>(null);
 
   const filteredEvents = useMemo(() => {
-    return initialEvents.filter((event) => {
+    return events.filter((event) => {
       const matchesTab =
         activeTab === "All" || event.status === activeTab;
 
@@ -97,15 +102,28 @@ export default function JoinedEventsPage() {
 
       return matchesTab && matchesSearch;
     });
-  }, [activeTab, search]);
+  }, [events, activeTab, search]);
 
-  const upcomingCount = initialEvents.filter(
+  const upcomingCount = events.filter(
     (event) => event.status === "Upcoming"
   ).length;
 
-  const completedCount = initialEvents.filter(
+  const completedCount = events.filter(
     (event) => event.status === "Completed"
   ).length;
+
+  const confirmLeave = () => {
+    if (!leaveId) return;
+
+    setEvents((previous) =>
+      previous.filter((event) => event.id !== leaveId)
+    );
+
+    setLeaveId(null);
+    toast.success("You have left the event.");
+  };
+
+  const selectedEvent = events.find((event) => event.id === leaveId);
 
   return (
     <>
@@ -123,9 +141,11 @@ export default function JoinedEventsPage() {
                   <Heart size={16} />
                   Your kindness journey
                 </p>
+
                 <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
                   Events you've joined.
                 </h1>
+
                 <p className="mt-4 max-w-xl text-sm leading-7 text-muted sm:text-base">
                   Every event you join is another opportunity to connect,
                   contribute, and create a little more good in the world.
@@ -134,7 +154,7 @@ export default function JoinedEventsPage() {
 
               <Link
                 href="/events"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
               >
                 Explore Events
                 <ArrowUpRight size={18} />
@@ -148,11 +168,11 @@ export default function JoinedEventsPage() {
             <div className="rounded-2xl border border-border bg-surface p-6">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted">Total joined</p>
-                <TicketCheck size={20} className="text-primary-dark" />
+                <div className="rounded-xl bg-secondary p-3">
+                  <TicketCheck size={20} className="text-primary-dark" />
+                </div>
               </div>
-              <h2 className="mt-4 text-3xl font-bold">
-                {initialEvents.length}
-              </h2>
+              <h2 className="mt-4 text-3xl font-bold">{events.length}</h2>
               <p className="mt-2 text-xs text-muted">
                 Your community commitments
               </p>
@@ -161,7 +181,9 @@ export default function JoinedEventsPage() {
             <div className="rounded-2xl border border-border bg-surface p-6">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted">Upcoming</p>
-                <CalendarDays size={20} className="text-primary-dark" />
+                <div className="rounded-xl bg-peach p-3">
+                  <CalendarDays size={20} className="text-primary-dark" />
+                </div>
               </div>
               <h2 className="mt-4 text-3xl font-bold">{upcomingCount}</h2>
               <p className="mt-2 text-xs text-muted">
@@ -172,7 +194,9 @@ export default function JoinedEventsPage() {
             <div className="rounded-2xl border border-border bg-surface p-6">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted">Completed</p>
-                <CheckCircle2 size={20} className="text-primary-dark" />
+                <div className="rounded-xl bg-surface-soft p-3">
+                  <CheckCircle2 size={20} className="text-primary-dark" />
+                </div>
               </div>
               <h2 className="mt-4 text-3xl font-bold">{completedCount}</h2>
               <p className="mt-2 text-xs text-muted">
@@ -236,7 +260,13 @@ export default function JoinedEventsPage() {
                         className="h-full w-full object-cover transition duration-500 hover:scale-105"
                       />
 
-                      <span className="absolute left-4 top-4 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-primary-dark">
+                      <span
+                        className={`absolute left-4 top-4 rounded-full px-4 py-2 text-xs font-semibold ${
+                          event.status === "Upcoming"
+                            ? "bg-white/90 text-primary-dark"
+                            : "bg-gray-800/80 text-white"
+                        }`}
+                      >
                         {event.status}
                       </span>
 
@@ -258,28 +288,40 @@ export default function JoinedEventsPage() {
                           <CalendarDays size={16} />
                           {event.date}
                         </p>
+
                         <p className="flex items-center gap-2">
                           <Clock size={16} />
                           {event.time}
                         </p>
+
                         <p className="flex items-center gap-2">
                           <MapPin size={16} />
                           {event.location}
                         </p>
+
                         <p className="flex items-center gap-2">
                           <Users size={16} />
                           Organized by {event.organizer}
                         </p>
                       </div>
 
-                      <div className="mt-6 border-t border-border pt-5">
+                      <div className="mt-6 flex gap-3 border-t border-border pt-5">
                         <Link
                           href={`/events/${event.id}`}
-                          className="inline-flex items-center gap-2 rounded-full bg-surface-soft px-5 py-3 text-sm font-semibold transition hover:bg-secondary"
+                          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-surface-soft px-4 py-3 text-sm font-semibold transition hover:bg-secondary"
                         >
                           View Details
                           <ArrowUpRight size={16} />
                         </Link>
+
+                        {event.status === "Upcoming" && (
+                          <button
+                            onClick={() => setLeaveId(event.id)}
+                            className="rounded-full border border-red-200 px-5 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                          >
+                            Leave
+                          </button>
+                        )}
                       </div>
                     </div>
                   </article>
@@ -287,18 +329,103 @@ export default function JoinedEventsPage() {
               </div>
             ) : (
               <div className="mt-7 rounded-3xl border border-dashed border-border bg-surface px-5 py-16 text-center">
-                <CalendarDays size={35} className="mx-auto text-muted" />
-                <h3 className="mt-5 text-xl font-bold">No events found</h3>
-                <p className="mt-2 text-sm text-muted">
-                  Try another search term or choose a different category.
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface-soft">
+                  <CalendarDays size={26} className="text-muted" />
+                </div>
+
+                <h3 className="mt-5 text-xl font-bold">
+                  No events found
+                </h3>
+
+                <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted">
+                  {search
+                    ? "Try another search term."
+                    : "You haven't joined any events in this category yet. Discover something meaningful to do!"}
                 </p>
+
+                <Link
+                  href="/events"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark"
+                >
+                  Explore Events
+                  <ArrowUpRight size={17} />
+                </Link>
               </div>
             )}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-5 pb-16 lg:px-8">
+          <div className="flex flex-col items-center gap-4 rounded-3xl bg-secondary/70 px-7 py-10 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/70">
+              <Sparkles size={25} className="text-primary-dark" />
+            </div>
+            <h2 className="text-2xl font-bold">
+              There's always more good to do.
+            </h2>
+            <p className="max-w-lg text-sm leading-7 text-muted">
+              Discover new opportunities, meet wonderful people, and keep
+              making a difference in your community.
+            </p>
+            <Link
+              href="/events"
+              className="mt-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
+            >
+              Find Your Next Event
+            </Link>
           </div>
         </section>
       </main>
 
       <Footer />
+
+      {leaveId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-5 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-surface p-7 shadow-2xl">
+            <div className="flex items-start justify-between">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50">
+                <X size={23} className="text-red-600" />
+              </div>
+
+              <button
+                onClick={() => setLeaveId(null)}
+                aria-label="Close confirmation"
+                className="rounded-full p-2 text-muted transition hover:bg-surface-soft"
+              >
+                <X size={19} />
+              </button>
+            </div>
+
+            <h2 className="mt-5 text-xl font-bold">
+              Leave this event?
+            </h2>
+
+            <p className="mt-3 text-sm leading-7 text-muted">
+              Are you sure you want to leave{" "}
+              <span className="font-semibold text-foreground">
+                {selectedEvent?.title}
+              </span>
+              ? You can always explore other events.
+            </p>
+
+            <div className="mt-7 flex gap-3">
+              <button
+                onClick={() => setLeaveId(null)}
+                className="flex-1 rounded-full border border-border px-5 py-3 text-sm font-semibold transition hover:bg-surface-soft"
+              >
+                Stay Joined
+              </button>
+
+              <button
+                onClick={confirmLeave}
+                className="flex-1 rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
+              >
+                Leave Event
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
