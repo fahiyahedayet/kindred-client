@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import {
   Menu,
@@ -10,7 +10,6 @@ import {
   Sun,
   Moon,
   HeartHandshake,
-  ChevronDown,
 } from "lucide-react";
 
 const navLinks = [
@@ -21,23 +20,38 @@ const navLinks = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
             <HeartHandshake size={23} />
           </div>
+
           <div>
-            <h1 className="text-xl font-bold tracking-tight">kindred.</h1>
+            <h1 className="text-xl font-bold tracking-tight">
+              kindred.
+            </h1>
             <p className="text-[10px] tracking-wider text-muted">
               SMALL ACTS. GREATER CHANGE.
             </p>
           </div>
         </Link>
 
+        {/* Desktop Navigation */}
         <div className="hidden items-center gap-8 md:flex">
           {navLinks.map((link) => (
             <Link
@@ -50,13 +64,22 @@ export default function Navbar() {
           ))}
         </div>
 
+        {/* Desktop Actions */}
         <div className="hidden items-center gap-3 md:flex">
           <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="rounded-full border border-border p-2.5 transition hover:bg-surface-soft"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border transition hover:bg-surface-soft"
           >
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            {mounted ? (
+              theme === "dark" ? (
+                <Sun size={18} />
+              ) : (
+                <Moon size={18} />
+              )
+            ) : (
+              <span className="h-[18px] w-[18px]" />
+            )}
           </button>
 
           <Link
@@ -74,18 +97,28 @@ export default function Navbar() {
           </Link>
         </div>
 
+        {/* Mobile Actions */}
         <div className="flex items-center gap-2 md:hidden">
           <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="rounded-full border border-border p-2"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border"
           >
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            {mounted ? (
+              theme === "dark" ? (
+                <Sun size={18} />
+              ) : (
+                <Moon size={18} />
+              )
+            ) : (
+              <span className="h-[18px] w-[18px]" />
+            )}
           </button>
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={menuOpen}
             className="rounded-lg border border-border p-2"
           >
             {menuOpen ? <X size={21} /> : <Menu size={21} />}
@@ -93,6 +126,7 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* Mobile Navigation */}
       {menuOpen && (
         <div className="border-t border-border bg-background px-5 py-5 md:hidden">
           <div className="flex flex-col gap-5">
@@ -101,7 +135,7 @@ export default function Navbar() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium text-muted"
+                className="text-sm font-medium text-muted transition hover:text-primary-dark"
               >
                 {link.name}
               </Link>
@@ -115,6 +149,7 @@ export default function Navbar() {
               >
                 Log in
               </Link>
+
               <Link
                 href="/sign-up"
                 onClick={() => setMenuOpen(false)}
