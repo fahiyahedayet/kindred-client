@@ -12,6 +12,9 @@ import {
   Heart,
   ArrowUpRight,
   Search,
+  Clock,
+  MapPin,
+  Users,
 } from "lucide-react";
 
 type JoinedEvent = {
@@ -19,8 +22,12 @@ type JoinedEvent = {
   title: string;
   category: string;
   date: string;
+  time: string;
   location: string;
+  image: string;
+  organizer: string;
   status: "Upcoming" | "Completed";
+  joinedOn: string;
 };
 
 const initialEvents: JoinedEvent[] = [
@@ -29,32 +36,48 @@ const initialEvents: JoinedEvent[] = [
     title: "A Cleaner Tomorrow",
     category: "Cleanup",
     date: "November 8, 2026",
+    time: "8:00 AM – 12:00 PM",
     location: "Patenga Beach, Chattogram",
+    image: "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?w=800",
+    organizer: "Kindred Community",
     status: "Upcoming",
+    joinedOn: "October 20, 2026",
   },
   {
     id: "2",
     title: "Plant a Little Hope",
     category: "Plantation",
     date: "November 12, 2026",
+    time: "9:00 AM – 1:00 PM",
     location: "CRB, Chattogram",
+    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800",
+    organizer: "Green Tomorrow",
     status: "Upcoming",
+    joinedOn: "October 22, 2026",
   },
   {
     id: "3",
     title: "Warm Hearts, Warm Homes",
     category: "Donation",
     date: "November 15, 2026",
+    time: "10:00 AM – 2:00 PM",
     location: "GEC Circle, Chattogram",
+    image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800",
+    organizer: "Kindred Community",
     status: "Upcoming",
+    joinedOn: "October 25, 2026",
   },
   {
     id: "4",
     title: "A Day of Giving",
     category: "Community",
     date: "October 10, 2026",
+    time: "10:00 AM – 2:00 PM",
     location: "Agrabad, Chattogram",
+    image: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800",
+    organizer: "Kindred Community",
     status: "Completed",
+    joinedOn: "September 28, 2026",
   },
 ];
 
@@ -199,51 +222,76 @@ export default function JoinedEventsPage() {
               ))}
             </div>
 
-            {filteredEvents.length === 0 && (
+            {filteredEvents.length > 0 ? (
+              <div className="mt-7 grid gap-6 md:grid-cols-2">
+                {filteredEvents.map((event) => (
+                  <article
+                    key={event.id}
+                    className="overflow-hidden rounded-3xl border border-border bg-surface transition hover:shadow-lg"
+                  >
+                    <div className="relative h-52 overflow-hidden">
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                      />
+
+                      <span className="absolute left-4 top-4 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-primary-dark">
+                        {event.status}
+                      </span>
+
+                      <span className="absolute right-4 top-4 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-gray-700">
+                        {event.category}
+                      </span>
+                    </div>
+
+                    <div className="p-6">
+                      <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-start">
+                        <h3 className="text-xl font-bold">{event.title}</h3>
+                        <span className="shrink-0 text-xs text-muted">
+                          Joined {event.joinedOn}
+                        </span>
+                      </div>
+
+                      <div className="mt-5 space-y-3 text-sm text-muted">
+                        <p className="flex items-center gap-2">
+                          <CalendarDays size={16} />
+                          {event.date}
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <Clock size={16} />
+                          {event.time}
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <MapPin size={16} />
+                          {event.location}
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <Users size={16} />
+                          Organized by {event.organizer}
+                        </p>
+                      </div>
+
+                      <div className="mt-6 border-t border-border pt-5">
+                        <Link
+                          href={`/events/${event.id}`}
+                          className="inline-flex items-center gap-2 rounded-full bg-surface-soft px-5 py-3 text-sm font-semibold transition hover:bg-secondary"
+                        >
+                          View Details
+                          <ArrowUpRight size={16} />
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
               <div className="mt-7 rounded-3xl border border-dashed border-border bg-surface px-5 py-16 text-center">
                 <CalendarDays size={35} className="mx-auto text-muted" />
                 <h3 className="mt-5 text-xl font-bold">No events found</h3>
                 <p className="mt-2 text-sm text-muted">
                   Try another search term or choose a different category.
                 </p>
-              </div>
-            )}
-
-            {filteredEvents.length > 0 && (
-              <div className="mt-7 grid gap-5 md:grid-cols-2">
-                {filteredEvents.map((event) => (
-                  <article
-                    key={event.id}
-                    className="rounded-2xl border border-border bg-surface p-6"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <span className="text-xs font-semibold text-primary-dark">
-                          {event.category}
-                        </span>
-                        <h3 className="mt-2 text-xl font-bold">
-                          {event.title}
-                        </h3>
-                      </div>
-                      <span className="rounded-full bg-surface-soft px-3 py-1 text-xs font-medium">
-                        {event.status}
-                      </span>
-                    </div>
-
-                    <p className="mt-4 text-sm text-muted">{event.date}</p>
-                    <p className="mt-2 text-sm text-muted">
-                      {event.location}
-                    </p>
-
-                    <Link
-                      href={`/events/${event.id}`}
-                      className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary-dark"
-                    >
-                      View Details
-                      <ArrowUpRight size={16} />
-                    </Link>
-                  </article>
-                ))}
               </div>
             )}
           </div>
