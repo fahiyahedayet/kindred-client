@@ -6,6 +6,9 @@ import { HeartHandshake, Mail, Lock, Heart, ArrowRight, Eye, EyeOff } from "luci
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { FcGoogle } from "react-icons/fc";
+import { FaGithub } from "react-icons/fa";
+
 export default function SignInPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -109,35 +112,35 @@ export default function SignInPage() {
                                 </div>
                             </div>
 
-                           <div>
-  <label className="mb-2 block text-sm font-semibold">
-    Password
-  </label>
+                            <div>
+                                <label className="mb-2 block text-sm font-semibold">
+                                    Password
+                                </label>
 
-  <div className="relative">
-    <Lock
-      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
-      size={18}
-    />
+                                <div className="relative">
+                                    <Lock
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
+                                        size={18}
+                                    />
 
-    <input
-      type={showPassword ? "text" : "password"}
-      value={password}
-      onChange={(e) => setPassword(e.target.value)}
-      placeholder="Enter your password"
-      className="w-full rounded-xl border border-border bg-surface py-3.5 pl-11 pr-12 text-sm outline-none transition focus:border-primary"
-    />
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Enter your password"
+                                        className="w-full rounded-xl border border-border bg-surface py-3.5 pl-11 pr-12 text-sm outline-none transition focus:border-primary"
+                                    />
 
-    <button
-      type="button"
-      onClick={() => setShowPassword(!showPassword)}
-      aria-label="Toggle password visibility"
-      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted"
-    >
-      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-    </button>
-  </div>
-</div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        aria-label="Toggle password visibility"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
 
                             <button
                                 type="submit"
@@ -147,6 +150,32 @@ export default function SignInPage() {
                                 <ArrowRight size={17} />
                             </button>
                         </form>
+
+                        <div className="my-6 flex items-center gap-4">
+                            <div className="h-px flex-1 bg-border" />
+                            <span className="text-xs text-muted">OR CONTINUE WITH</span>
+                            <div className="h-px flex-1 bg-border" />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => toast("Google login will be connected soon.")}
+                                className="flex items-center justify-center gap-2 rounded-full border border-border bg-surface py-3.5 text-sm font-semibold transition hover:bg-surface-soft"
+                            >
+                                <FcGoogle size={20} />
+                                Google
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => toast("GitHub login will be connected soon.")}
+                                className="flex items-center justify-center gap-2 rounded-full border border-border bg-surface py-3.5 text-sm font-semibold transition hover:bg-surface-soft"
+                            >
+                                <FaGithub size={20} />
+                                GitHub
+                            </button>
+                        </div>
 
                         <p className="mt-7 text-center text-sm text-muted">
                             Don't have an account?{" "}
