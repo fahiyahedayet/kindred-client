@@ -5,6 +5,8 @@ import Link from "next/link";
 import { HeartHandshake, Mail, Lock, User, Camera, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { FcGoogle } from "react-icons/fc";
+import { FaGithub } from "react-icons/fa";
 
 export default function SignUpPage() {
     const [formData, setFormData] = useState({
@@ -244,6 +246,32 @@ export default function SignUpPage() {
                                 Create Account
                             </button>
                         </form>
+
+                        <div className="my-6 flex items-center gap-4">
+                            <div className="h-px flex-1 bg-border" />
+                            <span className="text-xs text-muted">OR CONTINUE WITH</span>
+                            <div className="h-px flex-1 bg-border" />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => toast("Google sign-up will be connected soon.")}
+                                className="flex items-center justify-center gap-2 rounded-full border border-border bg-surface py-3.5 text-sm font-semibold transition hover:bg-surface-soft"
+                            >
+                                <FcGoogle size={20} />
+                                Google
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => toast("GitHub sign-up will be connected soon.")}
+                                className="flex items-center justify-center gap-2 rounded-full border border-border bg-surface py-3.5 text-sm font-semibold transition hover:bg-surface-soft"
+                            >
+                                <FaGithub size={20} />
+                                GitHub
+                            </button>
+                        </div>
 
                         <p className="mt-7 text-center text-sm text-muted">
                             Already have an account?{" "}
