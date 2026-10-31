@@ -179,6 +179,20 @@ export default function EventsPage() {
           </div>
 
           <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
+            <div className="relative w-full lg:max-w-md">
+              <Search
+                size={19}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
+              />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by event, category, or location..."
+                className="w-full rounded-full border border-border bg-surface py-3.5 pl-12 pr-5 text-sm outline-none transition placeholder:text-muted focus:border-primary"
+              />
+            </div>
             
 
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
