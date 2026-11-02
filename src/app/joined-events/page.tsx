@@ -1,9 +1,9 @@
-
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { authClient } from "../../lib/auth-client";
 import {
   CalendarDays,
   MapPin,
@@ -17,8 +17,6 @@ import {
   X,
   Sparkles,
 } from "lucide-react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 
 type JoinedEvent = {
   id: string;
@@ -33,72 +31,115 @@ type JoinedEvent = {
   joinedOn: string;
 };
 
-const initialEvents: JoinedEvent[] = [
-  {
-    id: "1",
-    title: "A Cleaner Tomorrow",
-    category: "Cleanup",
-    date: "November 8, 2026",
-    time: "8:00 AM – 12:00 PM",
-    location: "Patenga Beach, Chattogram",
-    image: "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?w=800",
-    organizer: "Kindred Community",
-    status: "Upcoming",
-    joinedOn: "October 20, 2026",
-  },
-  {
-    id: "2",
-    title: "Plant a Little Hope",
-    category: "Plantation",
-    date: "November 12, 2026",
-    time: "9:00 AM – 1:00 PM",
-    location: "CRB, Chattogram",
-    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800",
-    organizer: "Green Tomorrow",
-    status: "Upcoming",
-    joinedOn: "October 22, 2026",
-  },
-  {
-    id: "3",
-    title: "Warm Hearts, Warm Homes",
-    category: "Donation",
-    date: "November 15, 2026",
-    time: "10:00 AM – 2:00 PM",
-    location: "GEC Circle, Chattogram",
-    image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800",
-    organizer: "Kindred Community",
-    status: "Upcoming",
-    joinedOn: "October 25, 2026",
-  },
-  {
-    id: "4",
-    title: "A Day of Giving",
-    category: "Community",
-    date: "October 10, 2026",
-    time: "10:00 AM – 2:00 PM",
-    location: "Agrabad, Chattogram",
-    image: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800",
-    organizer: "Kindred Community",
-    status: "Completed",
-    joinedOn: "September 28, 2026",
-  },
-];
+type ApiEvent = {
+  _id: string;
+  title: string;
+  category: string;
+  eventDate: string;
+  location: string;
+  imageUrl: string;
+  creatorEmail: string;
+  joinedAt: string;
+};
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function JoinedEventsPage() {
-  const [events, setEvents] = useState(initialEvents);
+  const [events, setEvents] = useState<JoinedEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("All");
   const [search, setSearch] = useState("");
   const [leaveId, setLeaveId] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState(false);
+
+  useEffect(() => {
+    const fetchJoinedEvents = async () => {
+      try {
+        const { data: tokenData, error: tokenError } =
+          await authClient.token();
+
+        if (tokenError || !tokenData?.token) {
+          toast.error("Please sign in to view your joined events.");
+          return;
+        }
+
+        const response = await fetch(`${API_URL}/api/events/joined`, {
+          headers: {
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(
+            result.message || "Failed to load joined events."
+          );
+        }
+
+        const formattedEvents: JoinedEvent[] = (
+          result.data as ApiEvent[]
+        ).map((event) => {
+          const eventDate = new Date(event.eventDate);
+          const joinedDate = new Date(event.joinedAt);
+
+          return {
+            id: event._id,
+            title: event.title,
+            category: event.category,
+            date: eventDate.toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            }),
+            time: eventDate.toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+            }),
+            location: event.location,
+            image:
+              event.imageUrl ||
+              "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?w=800",
+            organizer: event.creatorEmail || "Kindred Community",
+            status:
+              eventDate.getTime() > Date.now()
+                ? "Upcoming"
+                : "Completed",
+            joinedOn: joinedDate.toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            }),
+          };
+        });
+
+        setEvents(formattedEvents);
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Something went wrong while loading events."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJoinedEvents();
+  }, []);
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
       const matchesTab =
         activeTab === "All" || event.status === activeTab;
 
+      const searchTerm = search.toLowerCase();
+
       const matchesSearch =
-        event.title.toLowerCase().includes(search.toLowerCase()) ||
-        event.location.toLowerCase().includes(search.toLowerCase()) ||
-        event.category.toLowerCase().includes(search.toLowerCase());
+        event.title.toLowerCase().includes(searchTerm) ||
+        event.location.toLowerCase().includes(searchTerm) ||
+        event.category.toLowerCase().includes(searchTerm);
 
       return matchesTab && matchesSearch;
     });
@@ -112,23 +153,59 @@ export default function JoinedEventsPage() {
     (event) => event.status === "Completed"
   ).length;
 
-  const confirmLeave = () => {
-    if (!leaveId) return;
+  const confirmLeave = async () => {
+    if (!leaveId || leaving) return;
 
-    setEvents((previous) =>
-      previous.filter((event) => event.id !== leaveId)
-    );
+    setLeaving(true);
 
-    setLeaveId(null);
-    toast.success("You have left the event.");
+    try {
+      const { data: tokenData, error: tokenError } =
+        await authClient.token();
+
+      if (tokenError || !tokenData?.token) {
+        toast.error("Please sign in again.");
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/events/${leaveId}/leave`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${tokenData.token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Failed to leave this event.");
+      }
+
+      setEvents((previous) =>
+        previous.filter((event) => event.id !== leaveId)
+      );
+
+      setLeaveId(null);
+      toast.success("You have left the event.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again."
+      );
+    } finally {
+      setLeaving(false);
+    }
   };
 
-  const selectedEvent = events.find((event) => event.id === leaveId);
+  const selectedEvent = events.find(
+    (event) => event.id === leaveId
+  );
 
   return (
     <>
-      <Navbar />
-
       <main className="min-h-screen bg-background">
         <section className="relative overflow-hidden bg-surface-soft px-5 py-14 lg:px-8">
           <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-secondary/70 blur-3xl" />
@@ -246,7 +323,16 @@ export default function JoinedEventsPage() {
               ))}
             </div>
 
-            {filteredEvents.length > 0 ? (
+            {loading ? (
+              <div className="mt-7 flex min-h-64 items-center justify-center">
+                <div className="text-center">
+                  <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+                  <p className="mt-4 text-sm text-muted">
+                    Loading your joined events...
+                  </p>
+                </div>
+              </div>
+            ) : filteredEvents.length > 0 ? (
               <div className="mt-7 grid gap-6 md:grid-cols-2">
                 {filteredEvents.map((event) => (
                   <article
@@ -340,7 +426,9 @@ export default function JoinedEventsPage() {
                 <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted">
                   {search
                     ? "Try another search term."
-                    : "You haven't joined any events in this category yet. Discover something meaningful to do!"}
+                    : activeTab !== "All"
+                      ? `You don't have any ${activeTab.toLowerCase()} events yet.`
+                      : "You haven't joined any events yet. Discover something meaningful to do!"}
                 </p>
 
                 <Link
@@ -377,8 +465,6 @@ export default function JoinedEventsPage() {
         </section>
       </main>
 
-      <Footer />
-
       {leaveId && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-5 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl bg-surface p-7 shadow-2xl">
@@ -411,16 +497,18 @@ export default function JoinedEventsPage() {
             <div className="mt-7 flex gap-3">
               <button
                 onClick={() => setLeaveId(null)}
-                className="flex-1 rounded-full border border-border px-5 py-3 text-sm font-semibold transition hover:bg-surface-soft"
+                disabled={leaving}
+                className="flex-1 rounded-full border border-border px-5 py-3 text-sm font-semibold transition hover:bg-surface-soft disabled:opacity-50"
               >
                 Stay Joined
               </button>
 
               <button
                 onClick={confirmLeave}
-                className="flex-1 rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
+                disabled={leaving}
+                className="flex-1 rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Leave Event
+                {leaving ? "Leaving..." : "Leave Event"}
               </button>
             </div>
           </div>
