@@ -1,90 +1,120 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import {
-    Plus,
-    Search,
-    CalendarDays,
-    MapPin,
-    Users,
-    Pencil,
-    Trash2,
-    Eye,
-    ArrowUpRight,
-    HeartHandshake,
-    X,
-    LayoutList,
-    Clock,
+  Plus,
+  Search,
+  CalendarDays,
+  MapPin,
+  Users,
+  Pencil,
+  Trash2,
+  Eye,
+  ArrowUpRight,
+  HeartHandshake,
+  X,
+  LayoutList,
 } from "lucide-react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import { authClient } from "../../lib/auth-client";
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 type Event = {
-    id: string;
-    title: string;
-    category: string;
-    date: string;
-    location: string;
-    image: string;
-    volunteers: number;
-    spots: number;
-    status: "Upcoming" | "Completed";
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  location: string;
+  image: string;
+  volunteers: number;
+  status: "Upcoming" | "Completed";
 };
 
-const initialEvents: Event[] = [
-    {
-        id: "1",
-        title: "A Cleaner Tomorrow",
-        category: "Cleanup",
-        date: "November 8, 2026",
-        location: "Patenga Beach, Chattogram",
-        image: "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?w=800",
-        volunteers: 32,
-        spots: 18,
-        status: "Upcoming",
-    },
-    {
-        id: "2",
-        title: "Plant a Little Hope",
-        category: "Plantation",
-        date: "November 12, 2026",
-        location: "CRB, Chattogram",
-        image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800",
-        volunteers: 28,
-        spots: 12,
-        status: "Upcoming",
-    },
-    {
-        id: "3",
-        title: "Warm Hearts, Warm Homes",
-        category: "Donation",
-        date: "November 15, 2026",
-        location: "GEC Circle, Chattogram",
-        image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800",
-        volunteers: 45,
-        spots: 25,
-        status: "Upcoming",
-    },
-    {
-        id: "4",
-        title: "Community Food Drive",
-        category: "Community",
-        date: "October 10, 2026",
-        location: "Agrabad, Chattogram",
-        image: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800",
-        volunteers: 40,
-        spots: 0,
-        status: "Completed",
-    },
-];
+type ApiEvent = {
+  _id: string;
+  title: string;
+  category: string;
+  eventDate: string;
+  location: string;
+  imageUrl?: string;
+  volunteerCount: number;
+};
 
 export default function ManageEventsPage() {
-  const [events, setEvents] = useState(initialEvents);
+  const [events, setEvents] = useState<Event[]>([]);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+
+  const fetchMyEvents = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const tokenData = await authClient.token();
+      const token = tokenData.token;
+
+      if (!token) {
+        toast.error("Please sign in again.");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/events/my-events`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        cache: "no-store",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch your events.");
+      }
+
+      const mappedEvents: Event[] = (result.data as ApiEvent[]).map(
+        (event) => {
+          const eventDate = new Date(event.eventDate);
+
+          return {
+            id: event._id,
+            title: event.title,
+            category: event.category,
+            date: eventDate.toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            }),
+            location: event.location,
+            image:
+              event.imageUrl ||
+              "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800",
+            volunteers: event.volunteerCount || 0,
+            status: eventDate > new Date() ? "Upcoming" : "Completed",
+          };
+        }
+      );
+
+      setEvents(mappedEvents);
+    } catch (error) {
+      console.error("Fetch my events error:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not load your events."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchMyEvents();
+  }, [fetchMyEvents]);
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -93,7 +123,8 @@ export default function ManageEventsPage() {
 
       const matchesSearch =
         event.title.toLowerCase().includes(search.toLowerCase()) ||
-        event.location.toLowerCase().includes(search.toLowerCase());
+        event.location.toLowerCase().includes(search.toLowerCase()) ||
+        event.category.toLowerCase().includes(search.toLowerCase());
 
       return matchesFilter && matchesSearch;
     });
@@ -108,23 +139,58 @@ export default function ManageEventsPage() {
     0
   );
 
-  const confirmDelete = () => {
-    if (!deleteId) return;
-
-    setEvents((previous) =>
-      previous.filter((event) => event.id !== deleteId)
-    );
-
-    setDeleteId(null);
-    toast.success("Event removed successfully.");
-  };
-
   const selectedEvent = events.find((event) => event.id === deleteId);
+
+  const confirmDelete = async () => {
+    if (!deleteId || deleting) return;
+
+    try {
+      setDeleting(true);
+
+      const tokenData = await authClient.token();
+      const token = tokenData.token;
+
+      if (!token) {
+        toast.error("Please sign in again.");
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/events/${deleteId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete event.");
+      }
+
+      setEvents((previous) =>
+        previous.filter((event) => event.id !== deleteId)
+      );
+
+      setDeleteId(null);
+      toast.success("Event deleted successfully.");
+    } catch (error) {
+      console.error("Delete event error:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not delete this event."
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <>
-      <Navbar />
-
       <main className="min-h-screen bg-background">
         <section className="bg-surface-soft px-5 py-12 lg:px-8">
           <div className="mx-auto max-w-7xl">
@@ -163,7 +229,9 @@ export default function ManageEventsPage() {
                 </div>
               </div>
               <h2 className="mt-4 text-3xl font-bold">{events.length}</h2>
-              <p className="mt-2 text-xs text-muted">Events in your dashboard</p>
+              <p className="mt-2 text-xs text-muted">
+                Events in your dashboard
+              </p>
             </div>
 
             <div className="rounded-2xl border border-border bg-surface p-6">
@@ -174,7 +242,9 @@ export default function ManageEventsPage() {
                 </div>
               </div>
               <h2 className="mt-4 text-3xl font-bold">{upcomingCount}</h2>
-              <p className="mt-2 text-xs text-muted">Waiting for volunteers</p>
+              <p className="mt-2 text-xs text-muted">
+                Waiting for volunteers
+              </p>
             </div>
 
             <div className="rounded-2xl border border-border bg-surface p-6 sm:col-span-2 lg:col-span-1">
@@ -185,7 +255,9 @@ export default function ManageEventsPage() {
                 </div>
               </div>
               <h2 className="mt-4 text-3xl font-bold">{totalVolunteers}</h2>
-              <p className="mt-2 text-xs text-muted">People you've brought together</p>
+              <p className="mt-2 text-xs text-muted">
+                People you've brought together
+              </p>
             </div>
           </div>
 
@@ -212,7 +284,7 @@ export default function ManageEventsPage() {
               </div>
             </div>
 
-            <div className="mt-7 flex gap-2">
+            <div className="mt-7 flex flex-wrap gap-2">
               {["All", "Upcoming", "Completed"].map((filter) => (
                 <button
                   key={filter}
@@ -229,7 +301,16 @@ export default function ManageEventsPage() {
               ))}
             </div>
 
-            {filteredEvents.length > 0 ? (
+            {loading ? (
+              <div className="flex min-h-64 items-center justify-center">
+                <div className="text-center">
+                  <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+                  <p className="mt-4 text-sm text-muted">
+                    Loading your events...
+                  </p>
+                </div>
+              </div>
+            ) : filteredEvents.length > 0 ? (
               <div className="mt-7 grid gap-6 md:grid-cols-2">
                 {filteredEvents.map((event) => (
                   <article
@@ -281,9 +362,7 @@ export default function ManageEventsPage() {
                           className="h-full rounded-full bg-primary"
                           style={{
                             width: `${
-                              (event.volunteers /
-                                Math.max(event.volunteers + event.spots, 1)) *
-                              100
+                              event.volunteers > 0 ? 100 : 0
                             }%`,
                           }}
                         />
@@ -323,19 +402,35 @@ export default function ManageEventsPage() {
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface-soft">
                   <Search size={25} className="text-muted" />
                 </div>
-                <h3 className="mt-5 text-xl font-bold">No events found</h3>
+                <h3 className="mt-5 text-xl font-bold">
+                  {events.length === 0
+                    ? "You haven't created any events yet"
+                    : "No events found"}
+                </h3>
                 <p className="mt-2 text-sm text-muted">
-                  Try another search or change your filter.
+                  {events.length === 0
+                    ? "Create your first event and bring your community together."
+                    : "Try another search or change your filter."}
                 </p>
-                <button
-                  onClick={() => {
-                    setSearch("");
-                    setActiveFilter("All");
-                  }}
-                  className="mt-5 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white"
-                >
-                  Clear filters
-                </button>
+                {events.length === 0 ? (
+                  <Link
+                    href="/create-event"
+                    className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white"
+                  >
+                    <Plus size={17} />
+                    Create an Event
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setSearch("");
+                      setActiveFilter("All");
+                    }}
+                    className="mt-5 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white"
+                  >
+                    Clear filters
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -348,7 +443,9 @@ export default function ManageEventsPage() {
                 <HeartHandshake size={24} className="text-primary-dark" />
               </div>
               <div>
-                <h3 className="font-bold">Ready to make another difference?</h3>
+                <h3 className="font-bold">
+                  Ready to make another difference?
+                </h3>
                 <p className="mt-1 text-xs text-muted">
                   Start a new initiative with your community.
                 </p>
@@ -365,8 +462,6 @@ export default function ManageEventsPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
 
       {deleteId && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-5 backdrop-blur-sm">
@@ -397,16 +492,18 @@ export default function ManageEventsPage() {
             <div className="mt-7 flex gap-3">
               <button
                 onClick={() => setDeleteId(null)}
-                className="flex-1 rounded-full border border-border px-5 py-3 text-sm font-semibold transition hover:bg-surface-soft"
+                disabled={deleting}
+                className="flex-1 rounded-full border border-border px-5 py-3 text-sm font-semibold transition hover:bg-surface-soft disabled:opacity-50"
               >
                 Cancel
               </button>
 
               <button
                 onClick={confirmDelete}
-                className="flex-1 rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
+                disabled={deleting}
+                className="flex-1 rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
               >
-                Delete Event
+                {deleting ? "Deleting..." : "Delete Event"}
               </button>
             </div>
           </div>
@@ -415,4 +512,3 @@ export default function ManageEventsPage() {
     </>
   );
 }
-
