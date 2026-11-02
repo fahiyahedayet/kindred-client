@@ -12,18 +12,24 @@ import {
   EyeOff,
 } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { authClient } from "../../lib/auth-client";
 
 export default function SignInPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (isLoading) return;
 
     if (!email.trim() || !password) {
       toast.error("Please enter your email and password.");
@@ -35,7 +41,31 @@ export default function SignInPage() {
       return;
     }
 
-    toast.success("Form validation successful!");
+    try {
+      setIsLoading(true);
+
+      const { data, error } = await authClient.signIn.email({
+        email: email.trim(),
+        password,
+        callbackURL: "/",
+      });
+
+      if (error) {
+        toast.error(error.message || "Sign in failed. Please try again.");
+        return;
+      }
+
+      if (data) {
+        toast.success("Welcome back to Kindred!");
+        router.push("/");
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Sign in error:", error);
+      toast.error("Unable to sign in. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -175,10 +205,11 @@ export default function SignInPage() {
 
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 text-sm font-semibold text-white transition hover:bg-primary-dark"
+                disabled={isLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Sign In
-                <ArrowRight size={17} />
+                {isLoading ? "Signing In..." : "Sign In"}
+                {!isLoading && <ArrowRight size={17} />}
               </button>
             </form>
 
