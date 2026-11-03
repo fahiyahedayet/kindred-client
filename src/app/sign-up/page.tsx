@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -12,22 +11,28 @@ import {
   EyeOff,
 } from "lucide-react";
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-
 import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
+import { authClient } from "../../lib/auth-client";
 
 export default function SignUpPage() {
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     image: "",
     password: "",
     confirmPassword: "",
+    location: "",
+    bio: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -36,10 +41,36 @@ export default function SignUpPage() {
     });
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleGoogleSignUp = async () => {
+    if (isGoogleLoading || isLoading) return;
+
+    setIsGoogleLoading(true);
+
+    try {
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: `${window.location.origin}/`,
+      });
+
+      if (error) {
+        toast.error(
+          error.message || "Google sign-up failed. Please try again."
+        );
+        setIsGoogleLoading(false);
+      }
+    } catch (error) {
+      console.error("Google sign-up error:", error);
+      toast.error("Unable to connect to Google. Please try again.");
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const { name, email, image, password, confirmPassword } = formData;
+    if (isLoading || isGoogleLoading) return;
+
+    const { name, email, image, password, confirmPassword, location, bio } = formData;
 
     if (!name.trim() || !email.trim() || !password || !confirmPassword) {
       toast.error("Please fill in all required fields.");
@@ -51,7 +82,7 @@ export default function SignUpPage() {
       return;
     }
 
-    if (image && !/^https?:\/\/.+\..+/.test(image)) {
+    if (image.trim() && !/^https?:\/\/.+\..+/.test(image.trim())) {
       toast.error("Please enter a valid profile photo URL.");
       return;
     }
@@ -71,7 +102,35 @@ export default function SignUpPage() {
       return;
     }
 
-    toast.success("Form validation successful!");
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await authClient.signUp.email({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        image: image.trim() || "",
+        location: location.trim() || "",
+        bio: bio.trim() || "",
+        callbackURL: "/upcoming-events",
+      });
+
+      if (error) {
+        toast.error(error.message || "Registration failed. Please try again.");
+        return;
+      }
+
+      if (data) {
+        toast.success("Account created successfully!");
+        router.replace("/upcoming-events");
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Sign-up error:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -155,10 +214,7 @@ export default function SignUpPage() {
 
             <form onSubmit={handleSubmit} className="mt-9 space-y-5">
               <div>
-                <label
-                  htmlFor="name"
-                  className="mb-2 block text-sm font-semibold"
-                >
+                <label htmlFor="name" className="mb-2 block text-sm font-semibold">
                   Full Name
                 </label>
 
@@ -183,10 +239,7 @@ export default function SignUpPage() {
               </div>
 
               <div>
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-sm font-semibold"
-                >
+                <label htmlFor="email" className="mb-2 block text-sm font-semibold">
                   Email Address
                 </label>
 
@@ -211,10 +264,7 @@ export default function SignUpPage() {
               </div>
 
               <div>
-                <label
-                  htmlFor="image"
-                  className="mb-2 block text-sm font-semibold"
-                >
+                <label htmlFor="image" className="mb-2 block text-sm font-semibold">
                   Profile Photo URL
                   <span className="ml-2 text-xs font-normal text-muted">
                     (Optional)
@@ -240,10 +290,7 @@ export default function SignUpPage() {
               </div>
 
               <div>
-                <label
-                  htmlFor="password"
-                  className="mb-2 block text-sm font-semibold"
-                >
+                <label htmlFor="password" className="mb-2 block text-sm font-semibold">
                   Password
                 </label>
 
@@ -271,11 +318,7 @@ export default function SignUpPage() {
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-muted"
                     aria-label="Toggle password visibility"
                   >
-                    {showPassword ? (
-                      <EyeOff size={18} />
-                    ) : (
-                      <Eye size={18} />
-                    )}
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
 
@@ -330,9 +373,10 @@ export default function SignUpPage() {
 
               <button
                 type="submit"
-                className="w-full rounded-full bg-primary py-4 text-sm font-semibold text-white transition hover:bg-primary-dark"
+                disabled={isLoading || isGoogleLoading}
+                className="w-full rounded-full bg-primary py-4 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Create Account
+                {isLoading ? "Creating Account..." : "Create Account"}
               </button>
             </form>
 
@@ -342,25 +386,15 @@ export default function SignUpPage() {
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => toast("Google sign-up will be connected soon.")}
-                className="flex items-center justify-center gap-2 rounded-full border border-border bg-surface py-3.5 text-sm font-semibold transition hover:bg-surface-soft"
-              >
-                <FcGoogle size={20} />
-                Google
-              </button>
-
-              <button
-                type="button"
-                onClick={() => toast("GitHub sign-up will be connected soon.")}
-                className="flex items-center justify-center gap-2 rounded-full border border-border bg-surface py-3.5 text-sm font-semibold transition hover:bg-surface-soft"
-              >
-                <FaGithub size={20} />
-                GitHub
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleGoogleSignUp}
+              disabled={isGoogleLoading || isLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-surface py-3.5 text-sm font-semibold transition hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <FcGoogle size={20} />
+              {isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}
+            </button>
 
             <p className="mt-7 text-center text-sm text-muted">
               Already have an account?{" "}

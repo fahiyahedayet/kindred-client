@@ -15,7 +15,6 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
 import { authClient } from "../../lib/auth-client";
 
 export default function SignInPage() {
@@ -25,6 +24,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,6 +65,28 @@ export default function SignInPage() {
       toast.error("Unable to sign in. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (isGoogleLoading) return;
+
+    try {
+      setIsGoogleLoading(true);
+
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: `${window.location.origin}/`,
+      });
+
+      if (error) {
+        toast.error(error.message || "Google sign in failed.");
+        setIsGoogleLoading(false);
+      }
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      toast.error("Unable to sign in with Google. Please try again.");
+      setIsGoogleLoading(false);
     }
   };
 
@@ -205,7 +227,7 @@ export default function SignInPage() {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isGoogleLoading}
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isLoading ? "Signing In..." : "Sign In"}
@@ -219,25 +241,15 @@ export default function SignInPage() {
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => toast("Google login will be connected soon.")}
-                className="flex items-center justify-center gap-2 rounded-full border border-border bg-surface py-3.5 text-sm font-semibold transition hover:bg-surface-soft"
-              >
-                <FcGoogle size={20} />
-                Google
-              </button>
-
-              <button
-                type="button"
-                onClick={() => toast("GitHub login will be connected soon.")}
-                className="flex items-center justify-center gap-2 rounded-full border border-border bg-surface py-3.5 text-sm font-semibold transition hover:bg-surface-soft"
-              >
-                <FaGithub size={20} />
-                GitHub
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isGoogleLoading || isLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-surface py-3.5 text-sm font-semibold transition hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <FcGoogle size={20} />
+              {isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}
+            </button>
 
             <p className="mt-7 text-center text-sm text-muted">
               Don&apos;t have an account?{" "}

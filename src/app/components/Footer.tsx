@@ -1,6 +1,7 @@
 
 import Link from "next/link";
-import { HeartHandshake, Instagram, Facebook, Mail } from "lucide-react";
+import { FiHeart, FiMail } from "react-icons/fi";
+import { FaInstagram, FaFacebookF } from "react-icons/fa";
 
 export default function Footer() {
   return (
@@ -8,22 +9,38 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 md:grid-cols-2 lg:grid-cols-4 lg:px-8">
         <div className="lg:col-span-2">
           <Link href="/" className="flex items-center gap-2">
-            <HeartHandshake size={30} />
+            <FiHeart size={30} />
             <span className="text-2xl font-bold">kindred.</span>
           </Link>
+
           <p className="mt-4 max-w-sm text-sm leading-7 text-white/65">
             Small acts. Greater change. Together, we're building stronger
             communities through kindness, compassion, and meaningful action.
           </p>
+
           <div className="mt-5 flex gap-3">
-            <a href="#" aria-label="Instagram" className="rounded-full bg-white/10 p-2.5 hover:bg-white/20">
-              <Instagram size={18} />
+            <a
+              href="#"
+              aria-label="Instagram"
+              className="rounded-full bg-white/10 p-2.5 transition hover:bg-white/20"
+            >
+              <FaInstagram size={18} />
             </a>
-            <a href="#" aria-label="Facebook" className="rounded-full bg-white/10 p-2.5 hover:bg-white/20">
-              <Facebook size={18} />
+
+            <a
+              href="#"
+              aria-label="Facebook"
+              className="rounded-full bg-white/10 p-2.5 transition hover:bg-white/20"
+            >
+              <FaFacebookF size={18} />
             </a>
-            <a href="mailto:hello@kindred.org" aria-label="Email" className="rounded-full bg-white/10 p-2.5 hover:bg-white/20">
-              <Mail size={18} />
+
+            <a
+              href="mailto:hello@kindred.org"
+              aria-label="Email"
+              className="rounded-full bg-white/10 p-2.5 transition hover:bg-white/20"
+            >
+              <FiMail size={18} />
             </a>
           </div>
         </div>
@@ -51,7 +68,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-3 px-5 py-6 text-xs text-white/50 sm:flex-row lg:px-8">
           <p>© {new Date().getFullYear()} Kindred. All rights reserved.</p>
-          <p>Made with kindness, for a better tomorrow.</p>
+          <p>Made with kindness, for a better tomorrow. ♡</p>
         </div>
       </div>
     </footer>
