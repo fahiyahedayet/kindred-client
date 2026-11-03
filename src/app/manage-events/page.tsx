@@ -56,7 +56,7 @@ export default function ManageEventsPage() {
       setLoading(true);
 
       const tokenData = await authClient.token();
-      const token = tokenData.token;
+      const token = tokenData.data?.token;
 
       if (!token) {
         toast.error("Please sign in again.");
@@ -148,7 +148,7 @@ export default function ManageEventsPage() {
       setDeleting(true);
 
       const tokenData = await authClient.token();
-      const token = tokenData.token;
+      const token = tokenData.data?.token;
 
       if (!token) {
         toast.error("Please sign in again.");
@@ -199,9 +199,11 @@ export default function ManageEventsPage() {
                 <p className="text-sm font-semibold uppercase tracking-widest text-primary-dark">
                   Your community dashboard
                 </p>
+
                 <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
                   Manage your events
                 </h1>
+
                 <p className="mt-3 max-w-xl text-sm leading-7 text-muted">
                   Keep track of the events you organize and the people
                   joining your mission.
@@ -357,17 +359,6 @@ export default function ManageEventsPage() {
                         </p>
                       </div>
 
-                      <div className="mt-5 h-2 overflow-hidden rounded-full bg-surface-soft">
-                        <div
-                          className="h-full rounded-full bg-primary"
-                          style={{
-                            width: `${
-                              event.volunteers > 0 ? 100 : 0
-                            }%`,
-                          }}
-                        />
-                      </div>
-
                       <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-5">
                         <Link
                           href={`/events/${event.id}`}
@@ -402,16 +393,19 @@ export default function ManageEventsPage() {
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface-soft">
                   <Search size={25} className="text-muted" />
                 </div>
+
                 <h3 className="mt-5 text-xl font-bold">
                   {events.length === 0
                     ? "You haven't created any events yet"
                     : "No events found"}
                 </h3>
+
                 <p className="mt-2 text-sm text-muted">
                   {events.length === 0
                     ? "Create your first event and bring your community together."
                     : "Try another search or change your filter."}
                 </p>
+
                 {events.length === 0 ? (
                   <Link
                     href="/create-event"
