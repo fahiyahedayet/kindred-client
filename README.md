@@ -84,7 +84,7 @@ The API base URL is configured using `NEXT_PUBLIC_API_URL`.
 
 ## 🌍 Deployment
 
-The frontend is designed to be deployed with [Vercel](https://vercel.com/).
+The frontend is designed to be deployed with [Vercel](https://kindred-client-five.vercel.app/).
 
 Set the required environment variables in your deployment settings before building.
 
