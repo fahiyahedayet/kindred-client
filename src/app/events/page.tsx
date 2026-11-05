@@ -88,8 +88,8 @@ export default function EventsPage() {
 
   return (
     <>
-     
-     
+
+
 
       <main className="min-h-screen bg-background">
         <section className="relative overflow-hidden bg-surface-soft px-5 py-20 lg:px-8">
@@ -98,8 +98,8 @@ export default function EventsPage() {
 
           <div className="relative mx-auto max-w-7xl">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-primary-dark">
-                <Heart size={14} />
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-widest !text-[#303A33]">
+                <Heart size={14} className="!text-[#303A33]" />
                 Make a difference
               </span>
 
@@ -178,11 +178,10 @@ export default function EventsPage() {
                 <button
                   key={category}
                   onClick={() => setActiveCategory(category)}
-                  className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition ${
-                    activeCategory === category
+                  className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition ${activeCategory === category
                       ? "bg-primary text-white"
                       : "border border-border bg-surface text-muted hover:bg-surface-soft"
-                  }`}
+                    }`}
                 >
                   {category}
                 </button>

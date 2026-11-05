@@ -434,7 +434,7 @@ export default function ManageEventsPage() {
           <div className="flex flex-col items-center justify-between gap-5 rounded-3xl bg-secondary/70 px-7 py-9 sm:flex-row sm:px-10">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/70">
-                <HeartHandshake size={24} className="text-primary-dark" />
+                <HeartHandshake size={24} className="!text-[#303A33]" />
               </div>
               <div>
                 <h3 className="font-bold">

@@ -105,7 +105,7 @@ export default function SignInPage() {
           </Link>
 
           <div className="relative max-w-lg">
-            <span className="rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-primary-dark">
+            <span className="rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-widest !text-[#303A33]">
               Small Acts. Greater Change.
             </span>
 
@@ -120,7 +120,7 @@ export default function SignInPage() {
 
             <div className="mt-10 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/70">
-                <Heart size={22} className="text-primary-dark" />
+                 <Heart size={22} className="!text-[#303A33]" />
               </div>
               <p className="text-sm font-medium text-muted">
                 Every small act matters.

@@ -191,8 +191,8 @@ export default function CreateEventPage() {
           </Link>
 
           <div className="mt-9 max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-primary-dark">
-              <Sparkles size={14} />
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-widest !text-[#303A33]">
+              <Sparkles size={14} className="!text-[#303A33]" />
               Make something meaningful
             </span>
 
@@ -459,7 +459,7 @@ export default function CreateEventPage() {
           <aside className="space-y-6 lg:sticky lg:top-28">
             <div className="rounded-3xl bg-surface-soft p-7">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80">
-                <Sparkles size={23} className="text-primary-dark" />
+                <Sparkles size={14} className="!text-[#303A33]" />
               </div>
               <h3 className="mt-5 text-xl font-bold">
                 Every act begins somewhere.

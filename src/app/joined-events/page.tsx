@@ -446,7 +446,7 @@ export default function JoinedEventsPage() {
         <section className="mx-auto max-w-7xl px-5 pb-16 lg:px-8">
           <div className="flex flex-col items-center gap-4 rounded-3xl bg-secondary/70 px-7 py-10 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/70">
-              <Sparkles size={25} className="text-primary-dark" />
+              <Sparkles size={25} className="!text-[#303A33]" />
             </div>
             <h2 className="text-2xl font-bold">
               There's always more good to do.

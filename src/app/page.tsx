@@ -1,8 +1,7 @@
-
 "use client";
 
 import Link from "next/link";
-import { FormEvent } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import {
@@ -23,80 +22,15 @@ import {
   Quote,
 } from "lucide-react";
 
-const upcomingEvents = [
-  {
-    id: 1,
-    title: "A Greener Tomorrow",
-    category: "Environment",
-    date: "NOV 08, 2026",
-    time: "9:00 AM",
-    location: "Patenga Beach, Chattogram",
-    image:
-      "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=900",
-    color: "bg-[#dce8dd]",
-    participants: 42,
-  },
-  {
-    id: 2,
-    title: "Meals With Love",
-    category: "Community",
-    date: "NOV 12, 2026",
-    time: "11:00 AM",
-    location: "GEC Circle, Chattogram",
-    image:
-      "https://images.unsplash.com/photo-1593113598332-cd288d649433?w=900",
-    color: "bg-[#f3ddd1]",
-    participants: 28,
-  },
-  {
-    id: 3,
-    title: "Books Open Doors",
-    category: "Education",
-    date: "NOV 15, 2026",
-    time: "10:00 AM",
-    location: "Agrabad, Chattogram",
-    image:
-      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=900",
-    color: "bg-[#e9e3f2]",
-    participants: 35,
-  },
-  {
-    id: 4,
-    title: "Little Hands, Big Hearts",
-    category: "Children",
-    date: "NOV 18, 2026",
-    time: "10:30 AM",
-    location: "Nasirabad, Chattogram",
-    image:
-      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900",
-    color: "bg-[#f3ddd1]",
-    participants: 19,
-  },
-  {
-    id: 5,
-    title: "Plant One, Grow Hope",
-    category: "Environment",
-    date: "NOV 22, 2026",
-    time: "8:00 AM",
-    location: "Foy's Lake, Chattogram",
-    image:
-      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=900",
-    color: "bg-[#dce8dd]",
-    participants: 51,
-  },
-  {
-    id: 6,
-    title: "Warmth for Everyone",
-    category: "Donation",
-    date: "NOV 26, 2026",
-    time: "2:00 PM",
-    location: "Chawkbazar, Chattogram",
-    image:
-      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900",
-    color: "bg-[#e9e3f2]",
-    participants: 31,
-  },
-];
+type HomepageEvent = {
+  _id: string;
+  title: string;
+  category: string;
+  eventDate: string;
+  location: string;
+  imageUrl: string;
+  volunteerCount: number;
+};
 
 const pastEvents = [
   {
@@ -169,8 +103,47 @@ function SectionHeading({
     </div>
   );
 }
-
 export default function Home() {
+
+  const [upcomingEvents, setUpcomingEvents] = useState<HomepageEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUpcomingEvents = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        if (!apiUrl) {
+          throw new Error("NEXT_PUBLIC_API_URL is not configured.");
+        }
+
+        const response = await fetch(
+          `${apiUrl.replace(/\/$/, "")}/api/events?upcoming=true&limit=6`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch upcoming events.");
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.message || "Failed to load events.");
+        }
+
+        setUpcomingEvents(Array.isArray(result.data) ? result.data : []);
+      } catch (error) {
+        console.error("Upcoming events error:", error);
+        setUpcomingEvents([]);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+
+    fetchUpcomingEvents();
+  }, []);
+
+
   const handleNewsletter = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     toast("Newsletter subscriptions will be available soon!");
@@ -178,10 +151,10 @@ export default function Home() {
 
   return (
     <>
-    
+
 
       <main className="overflow-hidden">
-       
+
         <section className="px-5 pb-16 pt-8 lg:px-8 lg:pb-24 lg:pt-12">
           <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-[#dce8dd]">
             <div
@@ -224,7 +197,8 @@ export default function Home() {
 
                   <Link
                     href="/create-event"
-                    className="inline-flex items-center gap-2 rounded-full border border-[#647e65]/40 bg-white/50 px-7 py-4 text-sm font-semibold text-[#435d45] transition hover:bg-white"
+                     className="inline-flex items-center gap-2 rounded-full border border-[#647e65]/40 bg-white px-7 py-4 text-sm font-semibold !text-[#303A33] transition hover:bg-gray-100"
+
                   >
                     Start an Initiative
                   </Link>
@@ -396,13 +370,17 @@ export default function Home() {
         </section>
 
         {/* UPCOMING EVENTS */}
-        <section id="events" className="mx-auto max-w-7xl px-5 py-20 lg:px-8 lg:py-28">
+        <section
+          id="events"
+          className="mx-auto max-w-7xl px-5 py-20 lg:px-8 lg:py-28"
+        >
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <SectionHeading
               eyebrow="Make a difference"
               title="Find your next good thing."
               description="There is always something meaningful happening. Find an event that speaks to you and be part of the change."
             />
+
             <Link
               href="/events"
               className="mb-10 inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-primary-dark hover:gap-4"
@@ -411,53 +389,116 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents.map((event) => (
-              <article
-                key={event.id}
-                className="group overflow-hidden rounded-2xl border border-border bg-surface transition duration-300 hover:-translate-y-2 hover:shadow-xl"
-              >
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                  />
-                  <span className="absolute left-4 top-4 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[#536b54]">
-                    {event.category}
-                  </span>
-                </div>
+          {eventsLoading ? (
+            <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <div
+                  key={item}
+                  className="overflow-hidden rounded-2xl border border-border bg-surface"
+                >
+                  <div className="h-56 animate-pulse bg-surface-soft" />
 
-                <div className="p-6">
-                  <p className="text-xs font-bold tracking-wider text-primary-dark">
-                    {event.date}
-                  </p>
-                  <h3 className="mt-3 text-xl font-bold transition group-hover:text-primary-dark">
-                    {event.title}
-                  </h3>
-
-                  <div className="mt-5 space-y-3 text-sm text-muted">
-                    <p className="flex items-center gap-2">
-                      <Clock size={16} /> {event.time}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <MapPin size={16} /> {event.location}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Users size={16} /> {event.participants} people interested
-                    </p>
+                  <div className="space-y-4 p-6">
+                    <div className="h-3 w-1/3 animate-pulse rounded bg-surface-soft" />
+                    <div className="h-6 w-3/4 animate-pulse rounded bg-surface-soft" />
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-surface-soft" />
                   </div>
-
-                  <Link
-                    href={`/events/${event.id}`}
-                    className="mt-6 flex items-center justify-between border-t border-border pt-5 text-sm font-semibold text-primary-dark"
-                  >
-                    Explore event <ArrowRight size={18} />
-                  </Link>
                 </div>
-              </article>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : upcomingEvents.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-surface px-6 py-16 text-center">
+              <CalendarDays className="mx-auto mb-4 text-primary-dark" size={40} />
+
+              <h3 className="text-xl font-bold">
+                No upcoming events yet
+              </h3>
+
+              <p className="mt-3 text-sm text-muted">
+                Be the first to create an event and bring your community together.
+              </p>
+
+              <Link
+                href="/create-event"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#647e65] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#526b53]"
+              >
+                Create an Event <ArrowRight size={17} />
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+              {upcomingEvents.map((event) => {
+                const eventDate = new Date(event.eventDate);
+
+                const formattedDate = eventDate.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                });
+
+                const formattedTime = eventDate.toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                });
+
+                return (
+                  <article
+                    key={event._id}
+                    className="group overflow-hidden rounded-2xl border border-border bg-surface transition duration-300 hover:-translate-y-2 hover:shadow-xl"
+                  >
+                    <div className="relative h-56 overflow-hidden">
+                      <img
+                        src={
+                          event.imageUrl ||
+                          "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=900"
+                        }
+                        alt={event.title}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+
+                      <span className="absolute left-4 top-4 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[#536b54]">
+                        {event.category}
+                      </span>
+                    </div>
+
+                    <div className="p-6">
+                      <p className="text-xs font-bold tracking-wider text-primary-dark">
+                        {formattedDate}
+                      </p>
+
+                      <h3 className="mt-3 text-xl font-bold transition group-hover:text-primary-dark">
+                        {event.title}
+                      </h3>
+
+                      <div className="mt-5 space-y-3 text-sm text-muted">
+                        <p className="flex items-center gap-2">
+                          <Clock size={16} />
+                          {formattedTime}
+                        </p>
+
+                        <p className="flex items-center gap-2">
+                          <MapPin size={16} />
+                          {event.location}
+                        </p>
+
+                        <p className="flex items-center gap-2">
+                          <Users size={16} />
+                          {event.volunteerCount} people interested
+                        </p>
+                      </div>
+
+                      <Link
+                        href={`/events/${event._id}`}
+                        className="mt-6 flex items-center justify-between border-t border-border pt-5 text-sm font-semibold text-primary-dark"
+                      >
+                        Explore event <ArrowRight size={18} />
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
         <section className="px-5 pb-20 lg:px-8">
           <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-[#e9e3f2] px-7 py-16 text-center sm:px-14">
@@ -538,9 +579,8 @@ export default function Home() {
             {galleryImages.map((image, index) => (
               <div
                 key={image}
-                className={`overflow-hidden rounded-2xl ${
-                  index === 0 ? "row-span-2" : ""
-                } ${index === 3 ? "col-span-2 sm:col-span-1" : ""}`}
+                className={`overflow-hidden rounded-2xl ${index === 0 ? "row-span-2" : ""
+                  } ${index === 3 ? "col-span-2 sm:col-span-1" : ""}`}
               >
                 <img
                   src={image}

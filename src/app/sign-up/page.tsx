@@ -112,7 +112,7 @@ export default function SignUpPage() {
         image: image.trim() || "",
         location: location.trim() || "",
         bio: bio.trim() || "",
-        callbackURL: "/upcoming-events",
+        callbackURL: "/events",
       });
 
       if (error) {
@@ -122,7 +122,7 @@ export default function SignUpPage() {
 
       if (data) {
         toast.success("Account created successfully!");
-        router.replace("/upcoming-events");
+        router.replace("/events");
         router.refresh();
       }
     } catch (error) {
@@ -148,7 +148,7 @@ export default function SignUpPage() {
           </Link>
 
           <div className="relative max-w-lg">
-            <span className="rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-primary-dark">
+            <span className="rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-widest !text-[#303A33]">
               Small Acts. Greater Change.
             </span>
 
