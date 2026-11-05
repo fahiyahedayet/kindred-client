@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌿 Kindred — Client
 
-## Getting Started
+<p align="center">
+  <img src="https://img.shields.io/badge/Kindred-Community%20%26%20Kindness-647e65?style=for-the-badge" alt="Kindred" />
+  <img src="https://img.shields.io/badge/Next.js-Framework-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-Type%20Safe-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind%20CSS-Styling-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+</p>
 
-First, run the development server:
+<p align="center">
+  <b>Small acts. Greater change.</b>
+  <br />
+  A community-driven platform for people who believe kindness can make a difference.
+</p>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 💚 About Kindred
+
+Kindred brings people together through meaningful community events, volunteering, and social initiatives.
+
+Discover opportunities to help, connect with people who share your passion, and turn small acts of kindness into something bigger.
+
+## Related Repository
+
+- **Kindred Client:** [View the Client Repository](https://github.com/fahiyahedayet/kindred-client)
+
+## ✨ Features
+
+- 🌱 **Discover Events** — Explore upcoming community initiatives.
+- 🤝 **Join the Community** — Participate in events and make connections.
+- 💚 **Create Initiatives** — Bring your own ideas to life.
+- 🔐 **Authentication** — Secure user authentication with Better Auth.
+- 📅 **Event Management** — Create, update, and manage events.
+- 📱 **Responsive Design** — A smooth experience across devices.
+- 🔔 **Interactive Feedback** — Helpful toast notifications.
+
+## 🎨 Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| Next.js | React framework |
+| React | UI development |
+| TypeScript | Type safety |
+| Tailwind CSS | Styling and responsive layouts |
+| Lucide React | Icons |
+| React Hot Toast | Notifications |
+| Better Auth | Authentication |
+
+## 📂 Project Structure
+
+```text
+client/
+├── public/
+├── src/
+│   └── app/
+│       ├── components/
+│       ├── events/
+│       ├── create-event/
+│       ├── login/
+│       ├── signup/
+│       ├── profile/
+│       ├── layout.tsx
+│       └── page.tsx
+├── .env.local
+├── package.json
+├── next.config.ts
+├── tsconfig.json
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔗 API Integration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The client communicates with the Kindred backend to:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Fetch community events
+- Search and filter events
+- Create and manage events
+- Join or leave events
+- Retrieve user-specific events
+- Handle authentication
 
-## Learn More
+The API base URL is configured using `NEXT_PUBLIC_API_URL`.
 
-To learn more about Next.js, take a look at the following resources:
+## 🌍 Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The frontend is designed to be deployed with [Vercel](https://vercel.com/).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Set the required environment variables in your deployment settings before building.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<p align="center">
+  Made with 💚 for a kinder community.
+  <br />
+  <i>Designed with kindness. Built for connection.</i>
+</p>
